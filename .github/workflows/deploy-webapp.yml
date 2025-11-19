@@ -1,0 +1,43 @@
+name: Deploy Spring Boot to Azure Web App
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v3
+
+    - name: Configurar Java 21
+      uses: actions/setup-java@v3
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+
+    - name: Build do projeto
+      run: |
+        chmod +x ./gradlew
+        ./gradlew clean build -x test
+
+    - name: Login no Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Criar ZIP para deploy
+      run: |
+        mkdir deploy
+        cp build/libs/*.jar deploy/app.jar
+        cd deploy
+        zip -r app.zip .
+
+    - name: Deploy para Azure Web App
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: app-metaflow-rm557702
+        package: deploy/app.zip
