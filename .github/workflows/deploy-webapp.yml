@@ -22,23 +22,18 @@ jobs:
     - name: Grant execute permissions for Gradle
       run: chmod +x gradlew
 
+        
     - name: Build with Gradle
-      run: ./gradlew clean build
+      run: ./gradlew clean bootJar
 
+    
+    - name: List build output
+      run: ls -R build/libs
+
+    
     - name: Prepare deployment package
       run: |
         mkdir deploy
         cp build/libs/*.jar deploy/app.jar
         cd deploy
         zip -r app.zip .
-
-    - name: Azure Login
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-    - name: Deploy to Azure Web App
-      uses: azure/webapps-deploy@v2
-      with:
-        app-name: app-metaflow-rm557702
-        package: ./deploy/app.zip
