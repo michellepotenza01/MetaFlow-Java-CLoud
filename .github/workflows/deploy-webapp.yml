@@ -10,32 +10,35 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: Set up JDK 21
-        uses: actions/setup-java@v3
-        with:
-          distribution: temurin
-          java-version: '21'
+    - name: Set up Java 21
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '21'
 
-      - name: Build with Gradle
-        run: ./gradlew clean build
+    - name: Grant execute permissions for Gradle
+      run: chmod +x gradlew
 
-      - name: Create deploy artifact
-        run: |
-          mkdir -p deploy
-          cp build/libs/*.jar deploy/app.jar
-          cd deploy
-          zip -r app.zip .
+    - name: Build with Gradle
+      run: ./gradlew clean build
 
-      - name: Azure Login
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+    - name: Prepare deployment package
+      run: |
+        mkdir deploy
+        cp build/libs/*.jar deploy/app.jar
+        cd deploy
+        zip -r app.zip .
 
-      - name: Deploy to Azure WebApp
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: app-metaflow-rm557702
-          package: deploy/app.zip
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Deploy to Azure Web App
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: app-metaflow-rm557702
+        package: ./deploy/app.zip
