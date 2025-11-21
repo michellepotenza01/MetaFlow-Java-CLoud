@@ -43,12 +43,15 @@ steps:
     testResultsFiles: '**/build/test-results/test/**/TEST-*.xml'
     testRunTitle: 'Testes Unitários - $(Build.BuildId)'
 
-- script: ls -R $(System.DefaultWorkingDirectory)/build/libs
-  displayName: 'Debug: Listar Conteúdo da Pasta libs do build'
+- script: |
+    mkdir -p $(Build.ArtifactStagingDirectory)/drop_folder
+    cp $(System.DefaultWorkingDirectory)/build/libs/*.jar $(Build.ArtifactStagingDirectory)/drop_folder/
+  displayName: 'Copy JARs to Staging Directory'
 
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifacts'
   inputs:
-    PathtoPublish: '$(System.DefaultWorkingDirectory)/build/libs/**/*.jar' 
+    # Aponte para a pasta de staging que você acabou de criar
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)/drop_folder' 
     ArtifactName: 'drop'
     publishLocation: 'Container'
