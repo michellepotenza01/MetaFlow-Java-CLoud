@@ -12,12 +12,6 @@ steps:
     echo "DATABASE_PASSWORD: $(DATABASE_PASSWORD)" 
   displayName: 'Debug DB Variables'
 
-- task: replacetokens@6
-  inputs:
-    root: 'src/main/resources' 
-    sources: 'application.properties'
-    tokenPattern: 'azpipelines'
-
 - task: JavaToolInstaller@1
   inputs:
     versionSpec: '21'
@@ -42,10 +36,13 @@ steps:
     testRunner: 'JUnit'
     testResultsFiles: '**/build/test-results/test/**/TEST-*.xml'
     testRunTitle: 'Testes Unitários - $(Build.BuildId)'
-    
+
+- script: ls -R $(System.DefaultWorkingDirectory)/build
+  displayName: 'Debug: Listar Conteúdo da Pasta Build'
+
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifacts'
   inputs:
-    PathtoPublish: '$(System.DefaultWorkingDirectory)/build/libs/*.jar'
+    PathtoPublish: '$(System.DefaultWorkingDirectory)/build/libs/**/*.jar' 
     ArtifactName: 'drop'
     publishLocation: 'Container'
