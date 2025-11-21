@@ -43,12 +43,12 @@ steps:
     testResultsFiles: '**/build/test-results/test/**/TEST-*.xml'
     testRunTitle: 'Testes Unitários - $(Build.BuildId)'
 
-- script: ls -R $(System.DefaultWorkingDirectory)/build
-  displayName: 'Debug: Listar Conteúdo da Pasta Build'
+- script: ls -R $(System.DefaultWorkingDirectory)/build/libs
+  displayName: 'Debug: Listar Conteúdo da Pasta libs do build'
 
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifacts'
   inputs:
-    PathtoPublish: 'build/libs/*.jar' 
+    PathtoPublish: '$(System.DefaultWorkingDirectory)/build/libs/**/*.jar' 
     ArtifactName: 'drop'
     publishLocation: 'Container'
