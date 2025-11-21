@@ -5,18 +5,22 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
-- task: JavaToolInstaller@0
-  inputs:
-    versionSpec: '21'
-    jdkArchitectureOption: 'x64'
-    jdkSourceOption: 'PreInstalled'
-    
+- script: |
+    echo "Verificando variáveis do Banco de Dados:"
+    echo "DATABASE_URL: $(DATABASE_URL)"
+    echo "DATABASE_USERNAME: $(DATABASE_USERNAME)"
+    echo "DATABASE_PASSWORD: $(DATABASE_PASSWORD)" 
+  displayName: 'Debug DB Variables'
+
 - task: Gradle@3
   displayName: 'Build and Run Tests with Gradle'
   inputs:
     workingDirectory: ''
     gradleWrapperFile: 'gradlew'
     gradleOptions: '-Xmx3072m'
+    javaHomeOption: 'JDKVersion'
+    jdkVersionOption: '1.21'
+    jdkArchitectureOption: 'x64'
     publishJUnitResults: true
     testResultsFiles: '**/TEST-*.xml'
     tasks: 'build'
@@ -24,6 +28,7 @@ steps:
     DATABASE_URL: $(DATABASE_URL)
     DATABASE_USERNAME: $(DATABASE_USERNAME)
     DATABASE_PASSWORD: $(DATABASE_PASSWORD)
+
 - task: PublishTestResults@2
   inputs:
     testRunner: 'JUnit'
@@ -36,4 +41,3 @@ steps:
     PathtoPublish: '$(System.DefaultWorkingDirectory)/build/libs/*.jar'
     ArtifactName: 'drop'
     publishLocation: 'Container'
-
