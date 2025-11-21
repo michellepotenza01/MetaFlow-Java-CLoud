@@ -1,0 +1,33 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- task: Gradle@3
+  displayName: 'Build and Run Tests with Gradle'
+  inputs:
+    workingDirectory: ''
+    gradleWrapperFile: 'gradlew'
+    gradleOptions: '-Xmx3072m'
+    javaHomeOption: 'JDKVersion'
+    jdkVersionOption: '1.21'
+    jdkArchitectureOption: 'x64'
+    publishJUnitResults: true
+    testResultsFiles: '**/TEST-*.xml'
+    tasks: 'build'
+
+- task: PublishTestResults@2
+  inputs:
+    testRunner: 'JUnit'
+    testResultsFiles: '**/build/test-results/test/**/TEST-*.xml'
+    testRunTitle: 'Testes Unitários - $(Build.BuildId)'
+    
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifacts'
+  inputs:
+    PathtoPublish: '$(System.DefaultWorkingDirectory)/build/libs/*.jar'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
+
