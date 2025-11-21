@@ -17,7 +17,10 @@ steps:
     publishJUnitResults: true
     testResultsFiles: '**/TEST-*.xml'
     tasks: 'build'
-
+  env:
+    DATABASE_URL: $(DATABASE_URL)
+    DATABASE_USERNAME: $(DATABASE_USERNAME)
+    DATABASE_PASSWORD: $(DATABASE_PASSWORD)
 - task: PublishTestResults@2
   inputs:
     testRunner: 'JUnit'
