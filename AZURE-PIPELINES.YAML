@@ -1,0 +1,52 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- script: |
+    echo "Verificando variáveis do Banco de Dados:"
+    echo "DATABASE_URL: $(DATABASE_URL)"
+    echo "DATABASE_USERNAME: $(DATABASE_USERNAME)"
+    echo "DATABASE_PASSWORD: $(DATABASE_PASSWORD)" 
+  displayName: 'Debug DB Variables'
+
+- task: replacetokens@6
+  inputs:
+    root: 'src/main/resources' 
+    sources: 'application.properties'
+    tokenPattern: 'azpipelines'
+
+- task: JavaToolInstaller@1
+  inputs:
+    versionSpec: '21'
+    jdkArchitectureOption: 'x64'
+    jdkSourceOption: 'PreInstalled'
+
+- task: Gradle@3
+  displayName: 'Build and Run Tests with Gradle'
+  inputs:
+    workingDirectory: ''
+    gradleWrapperFile: 'gradlew'
+    gradleOptions: '-Xmx3072m'
+    publishJUnitResults: true
+    testResultsFiles: '*/TEST-.xml'
+
+- task: PublishTestResults@2
+  inputs:
+    testRunner: 'JUnit'
+    testResultsFiles: '**/build/test-results/test/**/TEST-*.xml'
+    testRunTitle: 'Testes Unitários - $(Build.BuildId)'
+
+- script: |
+    mkdir -p $(Build.ArtifactStagingDirectory)/drop_folder
+    cp $(System.DefaultWorkingDirectory)/build/libs/*.jar $(Build.ArtifactStagingDirectory)/drop_folder/
+  displayName: 'Copy JARs to Staging Directory'
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifacts'
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)/drop_folder' 
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
